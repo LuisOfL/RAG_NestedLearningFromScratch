@@ -6,45 +6,43 @@ from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient
 from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult
-
+from openai import AzureOpenAI
 
 AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-CONTAINER_NAME = "pdf"
-BLOB_NAME = "7245fcea1c7bf0a995952dabe3da456d.pdf" 
-
-# 2. Credenciales de Azure AI Document Intelligence
+DEPLOYMENT = "phi-4-mini-instruct"
 DOCUMENT_INTELLIGENCE_ENDPOINT = os.getenv("DOCUMENT_INTELLIGENCE_ENDPOINT")
 DOCUMENT_INTELLIGENCE_KEY = os.getenv("DOCUMENT_INTELLIGENCE_KEY")
 
-def obtener_texto_de_blob_pdf():
+
+client = AzureOpenAI(
+    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+    api_version="2024-08-01-preview"  
+)
+
+
+def obtener_texto_de_blob_pdf(BLOB_NAME, CONTAINER_NAME):
     try:
-        # Validación preventiva de variables de entorno
+
         if not all([AZURE_STORAGE_CONNECTION_STRING, DOCUMENT_INTELLIGENCE_ENDPOINT, DOCUMENT_INTELLIGENCE_KEY]):
             raise ValueError("Faltan configurar variables en tu archivo .env. Por favor verifícalo.")
 
-        # ---------------------------------------------------------
-        # PASO 1: Descargar el PDF desde Blob Storage a la memoria
-        # ---------------------------------------------------------
         print(f"Conectando a Blob Storage para descargar: {BLOB_NAME}...")
         blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
         blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
         
-        # Descargamos los bytes completos del PDF de forma directa
+
         pdf_bytes = blob_client.download_blob().readall()
         
-        # Convertimos esos bytes en un flujo de datos binarios en memoria RAM
+    
         pdf_stream = io.BytesIO(pdf_bytes)
         
-        # ---------------------------------------------------------
-        # PASO 2: Procesar los bytes con Azure Document Intelligence
-        # ---------------------------------------------------------
         print("Enviando el archivo a Azure AI Document Intelligence...")
         client = DocumentIntelligenceClient(
             endpoint=DOCUMENT_INTELLIGENCE_ENDPOINT, 
             credential=AzureKeyCredential(DOCUMENT_INTELLIGENCE_KEY)
         )
         
-        # Invocación corregida con el parámetro 'body' requerido por el SDK moderno
         poller = client.begin_analyze_document(
             model_id="prebuilt-layout",
             body=pdf_stream,
@@ -53,8 +51,6 @@ def obtener_texto_de_blob_pdf():
         )
         
         resultado: AnalyzeResult = poller.result()
-        
-        # Extraemos el string completo estructurado
         texto_final_string = resultado.content
         return texto_final_string
 
@@ -63,14 +59,20 @@ def obtener_texto_de_blob_pdf():
         return None
 
 
-# ==========================================
-# BLOQUE DE EJECUCIÓN PRINCIPAL
-# ==========================================
-if __name__ == "__main__":
-    texto_extraido = obtener_texto_de_blob_pdf()
-    
-    if texto_extraido:
-        print("\n¡Procesamiento exitoso! Contenido del string:\n")
-        print(texto_extraido)
-    else:
-        print("\nNo se pudo extraer el texto debido a los errores reportados arriba.")
+
+
+
+
+def preguntar_llm(prompt: str) -> str:
+    try:
+        respuesta = client.chat.completions.create(
+            model=DEPLOYMENT, 
+            messages=[
+                {"role": "system", "content": "Eres un asistente de IA servicial y experto en datos."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7 
+        )
+        return respuesta.choices[0].message.content
+    except Exception as e:
+        return f"Ocurrió un error al conectar con Azure OpenAI: {e}"
