@@ -38,15 +38,3 @@ El núcleo de la aplicación ejecuta el siguiente flujo integrado:
 * **Python:** Versión 3.9 o superior.
 
 ---
-
-## 🔧 Configuración del Entorno y Compilación
-
-### 1. Variables de Entorno (.env)
-Crea un archivo `.env` en el directorio raíz de Python con las siguientes credenciales:
-
-```env
-AZURE_STORAGE_CONNECTION_STRING="tu_connection_string_de_storage"
-DOCUMENT_INTELLIGENCE_ENDPOINT="[https://tu-recurso.cognitiveservices.azure.com/](https://tu-recurso.cognitiveservices.azure.com/)"
-DOCUMENT_INTELLIGENCE_KEY="tu_llave_de_document_intelligence"
-AZURE_OPENAI_API_KEY="tu_llave_de_azure_openai"
-AZURE_OPENAI_ENDPOINT="[https://tu-recurso-openai.openai.azure.com/](https://tu-recurso-openai.openai.azure.com/)"
