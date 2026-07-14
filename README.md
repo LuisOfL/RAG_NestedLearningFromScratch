@@ -1,4 +1,4 @@
-# RAG, math implementation (In Process)
+# RAG, math implementation (In Procces)
 
 
 
