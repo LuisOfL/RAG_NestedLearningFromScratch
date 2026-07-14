@@ -6,7 +6,7 @@
 
 Un backend híbrido de alto rendimiento diseñado para la ingesta de documentos, procesamiento de lenguaje natural y aceleración de cómputo en GPU. Este sistema combina la flexibilidad de **Python/FastAPI** junto con servicios en la nube de **Azure AI** para la extracción e inferencia de texto, delegando las tareas pesadas de procesamiento de texto, llamadas de red de baja latencia y clustering masivo a un backend nativo en **C++ y kernels de CUDA**.
 
-## 🚀 Características Principales
+##  Características Principales
 
 * **Extracción en la Nube & Local:** Integración con **Azure Document Intelligence** para procesar PDFs de forma remota y soporte nativo con **Poppler C++** para parsing de archivos locales.
 * **Procesamiento de Texto en C++:** Implementación nativa de un *Recursive Character Text Splitter* optimizado para la segmentación eficiente de cadenas de texto de gran volumen.
@@ -17,7 +17,7 @@ Un backend híbrido de alto rendimiento diseñado para la ingesta de documentos,
 
 ---
 
-## 🛠️ Arquitectura del Pipeline Principal
+##  Arquitectura del Pipeline Principal
 
 El núcleo de la aplicación ejecuta el siguiente flujo integrado:
 1. **Ingesta:** Se descarga un archivo PDF desde **Azure Blob Storage** o mediante un formulario HTTP.
